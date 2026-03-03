@@ -1,13 +1,14 @@
 import type { Response } from "express";
 
-interface SuccessPayload<T> {
+interface SuccessResponse<T> {
   message?: string;
   data?: T;
 }
-export const sendRes = <T>(
+
+export const sendResponse = <T>(
   res: Response,
   statusCode = 200,
-  payload?: SuccessPayload<T>
+  payload?: SuccessResponse<T>
 ) => {
   return res.status(statusCode).json({
     success: true,
