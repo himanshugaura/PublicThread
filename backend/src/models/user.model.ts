@@ -2,6 +2,7 @@ import mongoose, { Schema, Model } from "mongoose";
 import bcrypt from "bcrypt";
 import type { IUser } from "../types/entity.types.js";
 import { AuthProvider } from "../types/constants.types.js";
+import jwt from "jsonwebtoken";
 
 type UserModel = Model<IUser>;
 
@@ -95,6 +96,11 @@ const portfolioSchema = new Schema(
 
 const userSchema = new Schema<IUser, UserModel>(
   {
+    username: {
+      type: String,
+      required: true,
+      unique: true,
+    },
     name: {
       type: String,
       required: true,
@@ -115,6 +121,12 @@ const userSchema = new Schema<IUser, UserModel>(
     isVerified: {
       type: Boolean,
       default: false,
+    },
+    emailVerificationToken: {
+      type: String,
+    },
+    emailVerificationExpires: {
+      type: Date,
     },
     googleId: {
       type: String,
@@ -142,5 +154,12 @@ userSchema.methods.comparePassword = async function (
 ): Promise<boolean> {
   return bcrypt.compare(candidatePassword, this.password);
 };
+
+userSchema.methods.generateToken = function (): string {
+  const payload = { id: this._id };
+  return jwt.sign(payload, process.env.JWT_SECRET!, {
+    expiresIn: "7d",
+  });
+}
 
 export const User = mongoose.model<IUser, UserModel>("User", userSchema);

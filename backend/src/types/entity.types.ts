@@ -31,6 +31,7 @@ export interface Portfolio  {
 
 export interface IUser {
     name: string;
+    username: string;
     email: string;
     password: string;
     portfolio : Portfolio;   
@@ -39,10 +40,12 @@ export interface IUser {
         url: string;
         publicId: string;
     }
+    emailVerificationToken?: string;
+    emailVerificationExpires?: Date;
     googleId?: string;
     provider: AuthProvider;
     comparePassword(candidatePassword: string): Promise<boolean>;
-
+    generateToken(): string;
 }
 
 export interface IPost {
