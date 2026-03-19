@@ -44,8 +44,6 @@ export interface User {
     emailVerificationExpires?: Date;
     googleId?: string;
     provider: AuthProvider;
-    comparePassword(candidatePassword: string): Promise<boolean>;
-    generateToken(): string;
 }
 
 export interface Post {

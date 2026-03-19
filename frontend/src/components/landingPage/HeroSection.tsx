@@ -299,7 +299,7 @@ export default function HeroSection() {
               text-sm tracking-[0.04em] px-7 py-3
               bg-[rgba(240,236,228,0.1)] text-[#f0ece4]
               border border-[rgba(240,236,228,0.15)] rounded-[10px]
-              backdrop-blur-[16px]
+              backdrop-blur-lg
               shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05),inset_0_1px_0_0_rgba(255,255,255,0.08),0_4px_20px_rgba(0,0,0,0.3)]
               transition-all duration-200 cursor-pointer
               hover:bg-[rgba(240,236,228,0.18)]
@@ -314,7 +314,7 @@ export default function HeroSection() {
               text-sm tracking-[0.04em] px-7 py-3
               bg-[rgba(255,255,255,0.04)] text-[rgba(240,236,228,0.55)]
               border border-[rgba(240,236,228,0.1)] rounded-[10px]
-              backdrop-blur-[12px]
+              backdrop-blur-md
               shadow-[inset_0_0_0_1px_rgba(255,255,255,0.03),inset_0_1px_0_0_rgba(255,255,255,0.05),0_4px_16px_rgba(0,0,0,0.2)]
               transition-all duration-200 cursor-pointer
               hover:bg-[rgba(255,255,255,0.08)]
@@ -332,7 +332,7 @@ export default function HeroSection() {
       <div className="flex-1 flex justify-center items-center animate-[fadeUp_1s_0.6s_both]">
         <div className="relative w-full max-w-sm">
           {/* Subtle glow behind the card stack */}
-          <div className="absolute inset-0 -z-10 blur-3xl opacity-20 rounded-full bg-gradient-to-br from-emerald-500/30 via-transparent to-indigo-500/20" />
+          <div className="absolute inset-0 -z-10 blur-3xl opacity-20 rounded-full bg-linear-to-br from-emerald-500/30 via-transparent to-indigo-500/20" />
 
           {/* Header label */}
           <div className="flex items-center gap-2 mb-4 px-1">
@@ -343,7 +343,7 @@ export default function HeroSection() {
           </div>
 
           {/* Fixed-height container — same pattern as TrendingList */}
-          <div className="relative flex h-[380px] w-full flex-col overflow-hidden">
+          <div className="relative flex h-95 w-full flex-col overflow-hidden">
             <AnimatedList delay={2500}>
               {discussions.map((item, idx) => (
                 <DiscussionCard key={idx} {...item} />
@@ -351,7 +351,7 @@ export default function HeroSection() {
             </AnimatedList>
 
             {/* Fade-out gradient at bottom */}
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-[#0a0a0a]" />
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/4 bg-linear-to-t from-[#0a0a0a]" />
           </div>
         </div>
       </div>

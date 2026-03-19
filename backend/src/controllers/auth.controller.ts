@@ -7,6 +7,7 @@ import { generateEmailVerificationToken } from "../utils/generateEmailToken.js";
 import crypto from "crypto";
 import { sendVerificationMail } from "../utils/sendMail.js";
 import { OAuth2Client } from "google-auth-library";
+import { generateTempUsername } from "../utils/generateUsername.js";
 
 export const register = asyncHandler(async (req, res) => {
   const { name, username , email, password } = req.body;
@@ -33,7 +34,7 @@ export const register = asyncHandler(async (req, res) => {
   await user.save();
 
   const verificationUrl =
-    `${process.env.FRONTEND_URL}/verify-email/${token}`;
+    `${process.env.FRONTEND_URL}/auth/verify-email/${token}`;
 
   await sendVerificationMail({
     to: user.email,
@@ -53,17 +54,50 @@ export const register = asyncHandler(async (req, res) => {
 
   return sendResponse(res, 201, {
     message: "User registered successfully",
+    data: user,
+  });
+});
+
+export const verifyEmail = asyncHandler(async (req, res) => {
+  const { token } = req.params as { token: string };
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(token)
+    .digest("hex");
+
+  const user = await User.findOne({
+    emailVerificationToken: hashedToken,
+    emailVerificationExpires: { $gt: new Date() },
+  });
+
+ if (!user) {
+  throwError(400, "Invalid or expired verification link");
+  return;
+}
+
+  user.isVerified = true;
+  user.emailVerificationToken = undefined;
+  user.emailVerificationExpires = undefined;
+
+  await user.save();
+
+  return sendResponse(res, 200, {
+    message: "Email verified successfully",
   });
 });
 
 export const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
+  const user = await User.findOne({ email  , provider: AuthProvider.LOCAL }).select("+password");
+  const googleUser = await User.findOne({ email , provider: AuthProvider.GOOGLE });
 
-  const user = await User.findOne({ email })
-
-  if (!user) {
+  if (googleUser) {
+    throwError(400, "Try logging in with Google");
+  }
+  if (!user && !googleUser) {
     throwError(401, "User doesn't exist with this email");
   }
+
 
   const isMatch = await user?.comparePassword(password);
 
@@ -80,6 +114,7 @@ export const login = asyncHandler(async (req, res) => {
 
   return sendResponse(res, 200, {
     message: "User logged in successfully",
+    data: user,
   }); 
 });
 
@@ -112,34 +147,7 @@ export const getProfile = asyncHandler(async (req, res) => {
   });
 });
 
-export const verifyEmail = asyncHandler(async (req, res) => {
-  const { token } = req.params as { token: string };
 
-  const hashedToken = crypto
-    .createHash("sha256")
-    .update(token)
-    .digest("hex");
-
-  const user = await User.findOne({
-    emailVerificationToken: hashedToken,
-    emailVerificationExpires: { $gt: new Date() },
-  });
-
- if (!user) {
-  throwError(400, "Invalid or expired verification link");
-  return;
-}
-
-  user.isVerified = true;
-  user.emailVerificationToken = undefined;
-  user.emailVerificationExpires = undefined;
-
-  await user.save();
-
-  return sendResponse(res, 200, {
-    message: "Email verified successfully",
-  });
-});
 
 export const logout = asyncHandler(async (req, res) => {
   res.clearCookie("token", {
@@ -173,11 +181,13 @@ export const googleLogin = asyncHandler(async (req, res) => {
   const { email, name, picture } = payload;
 
   let user = await User.findOne({ email });
+  const tempUsername = await generateTempUsername();
 
   if (!user) {
     user = await User.create({
       email,
       name,
+      username: tempUsername,
       profileImage: {
         url: picture || "",
         publicId: "",
@@ -199,5 +209,41 @@ export const googleLogin = asyncHandler(async (req, res) => {
 
   return sendResponse(res, 200, {
     message: "Google login successful",
+    data: user,
+  });
+});
+
+export const sendVerificationToken = asyncHandler(async (req, res) => {
+  const userId = req.userId;
+
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throwError(404, "User not found");
+    return;
+  }
+
+  if (user.isVerified) {
+    throwError(400, "Email is already verified");
+  }
+
+  const { token, hashedToken } = generateEmailVerificationToken();
+
+  user.emailVerificationToken = hashedToken;
+  user.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+  await user.save();
+
+  const verificationUrl =
+    `${process.env.FRONTEND_URL}/auth/verify-email/${token}`;
+
+  await sendVerificationMail({
+    to: user.email,
+    name: user.name,
+    verificationUrl,
+  });
+
+  return sendResponse(res, 200, {
+    message: "Verification email sent successfully",
   });
 });

@@ -1,6 +1,7 @@
 import nodemailer from "nodemailer";
 import { verificationEmailTemplate } from "./mailTemplate.js";
-
+import dotenv from "dotenv";
+dotenv.config();
 interface SendMailOptions {
   to: string;
   name: string;

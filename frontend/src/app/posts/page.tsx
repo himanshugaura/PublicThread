@@ -3,7 +3,7 @@ import { useState } from "react";
 import { prettyCat } from "@/lib/utils";
 import { IPost } from "@/types/entity.types";
 import { CATEGORIES, Category, PostStatus, STATUS_FILTERS, StatusFilter } from "@/types/constants.types";
-import Navbar from "@/components/landingPage/Navbar";
+import Navbar from "@/components/common/Navbar";
 import StatusTabs from "@/components/posts/StatusTabs";
 import FilterDropdown from "@/components/posts/FilterDropdown";
 import SearchInput from "@/components/posts/SearchInput";

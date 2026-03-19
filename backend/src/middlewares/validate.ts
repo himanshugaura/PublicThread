@@ -17,7 +17,7 @@ export const validate =
       if (error instanceof ZodError) {
         const errors = error.issues.map((issue) => issue.message);
 
-        throwError(400, "Validation failed", errors);
+        throwError(400, "Fill all the required fields");
       }
 
       next(error);
